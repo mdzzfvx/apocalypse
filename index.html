@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Apocalypse ZX</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<meta name="theme-color" content="#7c3cff">
+
+<style>
+/* ================= BASE ================= */
+:root{
+  --bg:#05040b;
+  --accent:#7c3cff;
+  --accent2:#a65bff;
+  --text:#efeaff;
+  --muted:#bfb3ff;
+  --glass:rgba(255,255,255,.05);
+}
+*{box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);overflow:hidden}
+
+/* ================= BACKGROUND ================= */
+canvas{position:fixed;inset:0;z-index:0;filter:drop-shadow(0 0 18px #7c3cff)}
+.app{position:relative;z-index:2;padding:16px}
+
+/* ================= UI ================= */
+.header{
+  display:flex;gap:12px;align-items:center;
+  padding:14px;border-radius:14px;
+  border:1px solid #7c3cff55;
+  background:linear-gradient(180deg,#00000066,transparent);
+}
+.logo{
+  width:42px;height:42px;border-radius:10px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;
+  font-weight:900;
+}
+h1{margin:0;font-size:18px}
+.sub{font-size:12px;color:var(--muted)}
+
+.card{
+  margin-top:14px;padding:16px;border-radius:14px;
+  background:var(--glass);
+  border:1px solid #7c3cff55;
+  box-shadow:0 0 24px #7c3cff55 inset;
+}
+
+input,button{
+  width:100%;padding:12px;border-radius:10px;
+  border:none;font-weight:700;
+}
+input{margin-bottom:10px;background:#00000066;color:white;border:1px solid #ffffff22}
+button{
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  color:white;
+}
+button.ghost{
+  background:transparent;border:1px solid #ffffff22;margin-top:8px
+}
+
+/* ================= PANEL ================= */
+.panel{display:none}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.item{
+  padding:12px;border-radius:14px;
+  border:1px solid #7c3cff66;
+  background:linear-gradient(180deg,#ffffff08,#ffffff03);
+  box-shadow:0 0 16px #7c3cff66 inset;
+}
+.item h3{margin:0 0 6px;font-size:14px;color:var(--accent)}
+.item p{margin:0;font-size:12px;color:var(--muted)}
+.item button{margin-top:10px}
+
+/* ================= GAME ================= */
+.games{display:flex;gap:10px;margin-top:10px}
+.game{
+  flex:1;padding:10px;border-radius:12px;
+  text-align:center;border:1px solid #7c3cff66;
+}
+.game.active{
+  background:linear-gradient(90deg,var(--accent),var(--accent2))
+}
+
+/* ================= LOADER ================= */
+#loader{
+  position:fixed;inset:0;display:none;
+  background:#000000cc;z-index:9;
+  align-items:center;justify-content:center;
+}
+.box{
+  padding:22px;border-radius:14px;
+  background:#0c0a18;text-align:center;
+  box-shadow:0 0 40px #7c3cffaa;
+}
+.spin{
+  width:36px;height:36px;border-radius:50%;
+  border:4px solid #7c3cff44;
+  border-top-color:#a65bff;
+  animation:spin .8s linear infinite;margin:auto
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ================= BOOST ================= */
+.boost *{animation:none!important;transition:none!important}
+</style>
+</head>
+
+<body>
+<canvas id="bg"></canvas>
+
+<div class="app">
+  <div class="header">
+    <div class="logo">ZX</div>
+    <div>
+      <h1>Apocalypse ZX</h1>
+      <div class="sub">mdzzxiters.apocalypse</div>
+    </div>
+  </div>
+
+  <!-- LOGIN -->
+  <div class="card" id="loginBox">
+    <input id="key" placeholder="License Key">
+    <button onclick="login()">LOGIN</button>
+  </div>
+
+  <!-- PANEL -->
+  <div class="panel" id="panel">
+    <div class="card">
+      <h3>Game Version</h3>
+      <div class="games">
+        <div class="game active" onclick="setGame('ff')">FREE FIRE</div>
+        <div class="game" onclick="setGame('ffmax')">FF MAX</div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="item">
+        <h3>Delete Cache</h3>
+        <p>Clear app cache</p>
+        <button onclick="clearCache()">EXECUTE</button>
+      </div>
+      <div class="item">
+        <h3>Boost Device</h3>
+        <p>Performance mode</p>
+        <button onclick="boost()">BOOST</button>
+      </div>
+      <div class="item">
+        <h3>Aim Tracking</h3>
+        <p>Head 40%</p>
+        <button onclick="fake('Aim Applied')">APPLY</button>
+      </div>
+      <div class="item">
+        <h3>Stabilizer</h3>
+        <p>30%</p>
+        <button onclick="fake('Stabilizer Active')">APPLY</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Sensitivity</h3>
+      <div class="games">
+        <div class="game" onclick="fake('Sensitivity X1')">X1</div>
+        <div class="game" onclick="fake('Sensitivity X2')">X2</div>
+        <div class="game" onclick="fake('Sensitivity X3')">X3</div>
+        <div class="game" onclick="fake('Sensitivity X4')">X4</div>
+        <div class="game" onclick="fake('Sensitivity X5')">X5</div>
+      </div>
+      <button class="ghost" onclick="openGame()">OPEN GAME</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="box">
+    <div class="spin"></div>
+    <p id="ltext">Loading...</p>
+  </div>
+</div>
+
+<script>
+/* ================= SECURITY CORE ================= */
+
+// simple hash
+function hash(s){
+  let h=0; for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0}
+  return Math.abs(h).toString(16);
+}
+
+// device fingerprint
+function deviceId(){
+  return hash(
+    navigator.userAgent+
+    screen.width+"x"+screen.height+
+    navigator.language+
+    (navigator.hardwareConcurrency||"")
+  );
+}
+
+// admin register (HANYA KAMU)
+const ADMIN_CODE = "ZX-ADMIN-2025";
+
+// storage
+function getLic(){return JSON.parse(localStorage.getItem("zx_lic")||"{}")}
+function setLic(o){localStorage.setItem("zx_lic",JSON.stringify(o))}
+
+// LOGIN
+function login(){
+  const k = key.value.trim();
+  if(!k){alert("License key required");return}
+
+  const lic = getLic();
+  const hid = hash(k);
+  const dev = deviceId();
+
+  // belum terdaftar → BUTUH ADMIN
+  if(!lic[hid]){
+    const admin = prompt("Admin code required");
+    if(admin !== ADMIN_CODE){
+      alert("Invalid license");
+      return;
+    }
+    lic[hid] = dev; // bind 1 key = 1 device
+    setLic(lic);
+  }
+
+  // device beda
+  if(lic[hid] !== dev){
+    alert("License already used on another device");
+    return;
+  }
+
+  // sukses
+  loginBox.style.display="none";
+  panel.style.display="block";
+  sfx(700);
+}
+
+/* ================= FEATURES ================= */
+let game="ff";
+function setGame(g){
+  game=g;
+  document.querySelectorAll(".game").forEach(x=>x.classList.remove("active"));
+  event.target.classList.add("active");
+  sfx(500);
+}
+
+function clearCache(){
+  show("Cleaning cache...");
+  localStorage.clear();
+  done("Cache cleaned");
+}
+
+function boost(){
+  document.body.classList.toggle("boost");
+  show("Boosting...");
+  setTimeout(()=>done("Boost active"),900);
+}
+
+function fake(t){
+  show("Processing...");
+  setTimeout(()=>done(t),1000);
+}
+
+function openGame(){
+  show("Launching game...");
+  setTimeout(()=>{
+    location.href = game==="ff"?"freefire://":"freefiremax://";
+  },1500);
+}
+
+/* ================= UI ================= */
+function show(t){ltext.innerText=t;loader.style.display="flex";sfx(500)}
+function done(t){ltext.innerText=t;sfx(900);setTimeout(()=>loader.style.display="none",900)}
+
+/* ================= SOUND ================= */
+function sfx(f){
+  const c=new AudioContext(),o=c.createOscillator(),g=c.createGain();
+  o.frequency.value=f;o.connect(g);g.connect(c.destination);
+  g.gain.value=.05;o.start();setTimeout(()=>o.stop(),120);
+}
+
+/* ================= BACKGROUND ================= */
+const cv=bg,ctx=cv.getContext("2d");
+let w,h,p=[];
+function rs(){w=cv.width=innerWidth;h=cv.height=innerHeight}
+rs();onresize=rs;
+for(let i=0;i<60;i++)p.push({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5),vy:(Math.random()-.5)});
+(function loop(){
+  ctx.clearRect(0,0,w,h);
+  p.forEach(a=>{
+    p.forEach(b=>{
+      const d=Math.hypot(a.x-b.x,a.y-b.y);
+      if(d<120){
+        ctx.strokeStyle=`rgba(124,60,255,${1-d/120})`;
+        ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+      }
+    });
+    ctx.fillStyle="#a65bff";
+    ctx.beginPath();ctx.arc(a.x,a.y,1.4,0,Math.PI*2);ctx.fill();
+    a.x+=a.vx;a.y+=a.vy;
+    if(a.x<0||a.x>w)a.vx*=-1;
+    if(a.y<0||a.y>h)a.vy*=-1;
+  });
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
